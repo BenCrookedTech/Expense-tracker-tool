@@ -19,6 +19,23 @@ def add_expense():
 
     results_label.config(text="Expense Added successfully!", fg="green")
 
+def view_expense():
+    conn = get_connections()
+    cursor = conn.cursor()
+    cursor.execute("SELECT amount, category, expense_date, description FROM expenses ORDER BY expense_date DESC")
+    rows = cursor.fetchall()
+    conn.close()
+    cursor.close()
+
+    expenses_text.delete("1.0", END)
+
+    if not rows:
+        expenses_text.insert(END, "No expenses found")
+        return
+
+    for row in rows:
+        amount, category, expense_date, description = row
+        expenses_text.insert(END, f"Amount: {amount}, Category: {category}, Date: {expense_date}, Description: {description}\n") 
 
 window = Tk()
 window.geometry("400x400")
@@ -49,8 +66,14 @@ description_entry.grid(row=3,column=1)
 button = Button(window, text="Add Expense", command=add_expense)
 button.pack()
 
+view_button = Button(window, text="View Expenses", command=view_expense)
+view_button.pack()
+
+
 results_label = Label(window, text="")
 results_label.pack()
 
+expenses_text = Text(window, height=15, width=60, font=("Consolas", 12))
+expenses_text.pack()
 
 window.mainloop()
